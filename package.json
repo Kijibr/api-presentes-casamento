@@ -2,8 +2,7 @@
   "name": "api-presentes-casamento",
   "version": "0.0.1",
   "scripts": {
-    "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules ./api/index.ts",
-    "build": "tsc"
+    "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules ./api/index.ts"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
