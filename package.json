@@ -1,0 +1,31 @@
+{
+  "name": "api-presentes-casamento",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules ./api/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http-errors": "~1.6.3",
+    "mercadopago": "^2.0.9",
+    "morgan": "~1.9.1",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/node": "^20.14.8",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/nodemon": "^1.19.6",
+    "nodemon": "^3.1.4",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.2"
+  }
+}
