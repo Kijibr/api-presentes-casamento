@@ -5,20 +5,8 @@ import { randomUUID } from 'crypto';
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => res.send('api casamento is running, ok!'));
+router.post('/pix', (req: Request, res: Response, next) => {
 
-router.post('/pix-payment', (req: Request, res: Response, next) => {
-
-const mpAccessToken = process.env.MP_ACCESS_TOKEN || "";
-const client = new MercadoPagoConfig({ 
-  accessToken: mpAccessToken,
-  options: {
-    timeout: 5000,
-    idempotencyKey: randomUUID()
-  }
-});
-
-const payment = new Payment(client);
   const {
     transaction_amount, 
     description,
@@ -35,18 +23,54 @@ const payment = new Payment(client);
     payer: {
       email,
       first_name: payerName,
+      identification: {
+        type: identificationType,
+        number,
+      }
     },
   };
-
-  const requestOptions = { idempotencyKey: randomUUID() };
+  
+  const { environment, payment } = getPaymentCredentials();
+  const idempotencyKey = environment === "prd" ? randomUUID() : '<IDEMPOTENCY_KEY>'
+  const requestOptions = { idempotencyKey: idempotencyKey };
 
   payment.create({body, requestOptions})
   .then((response) => {
     res.send(response);
   })
   .catch((error) => {
-    res.status(500).json({ error: error.message });
+    res.status(500).json(error);
   });
 });
 
+router.get('/:id', (req: Request, res: Response) => {
+  const { environment, payment } = getPaymentCredentials();
+  const paymentId = req.params.id;
+      console.log("response payment: ", environment)
+  payment.get({
+    id: paymentId
+  }).then((response) => {
+    console.log("response payment: ", response)
+    res.send(response);
+  })
+  .catch((error) => {
+    console.log("error payment: ", error)
+    res.status(500).json(error);
+  });
+});
 export default router;
+
+function getPaymentCredentials() {
+  const environment = process.env.ENVIRONMENT;
+  const mpAccessToken = (environment === "prd" ? process.env.MP_ACCESS_TOKEN : process.env.MP_ACCESS_TOKEN_DEV) ?? "";
+  const client = new MercadoPagoConfig({
+    accessToken: mpAccessToken,
+    options: {
+      timeout: 5000,
+      idempotencyKey: 'abc'
+    }
+  });
+
+  const payment = new Payment(client);
+  return { environment, payment };
+}

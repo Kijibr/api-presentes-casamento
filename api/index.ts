@@ -1,10 +1,9 @@
-import express from "express";
-
+import express, { Request, Response } from "express";
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import indexRouter from '../src/routes/payments';
+import paymentsRouter from '../src/routes/payments';
 
 dotenv.config();
 const app = express();
@@ -17,7 +16,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use('/', indexRouter);
+app.get('/', (req: Request, res: Response) => res.send('api casamento is running, ok!'));
+app.use('/payment', paymentsRouter);
 
 app.listen(PORT, () => { 
   console.log("Server running at PORT: ", PORT); 
