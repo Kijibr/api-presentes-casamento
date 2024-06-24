@@ -42,11 +42,9 @@ const payment = new Payment(client);
 
   payment.create({body, requestOptions})
   .then((response) => {
-    console.log("response payment: ", response)
     res.send(response);
   })
   .catch((error) => {
-    console.log("error payment: ", error)
     res.status(500).json({ error: error.message });
   });
 });
