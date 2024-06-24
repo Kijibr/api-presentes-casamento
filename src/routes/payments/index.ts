@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 
 import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { randomUUID } from 'crypto';
 
 const router = Router();
 
@@ -12,8 +13,8 @@ const mpAccessToken = process.env.MP_ACCESS_TOKEN || "";
 const client = new MercadoPagoConfig({ 
   accessToken: mpAccessToken,
   options: {
-    timeout: 30000,
-    idempotencyKey: 'abc'
+    timeout: 5000,
+    idempotencyKey: randomUUID()
   }
 });
 
@@ -23,6 +24,7 @@ const payment = new Payment(client);
     description,
     email,
     identificationType,
+    payerName,
     number  
   } = req.body;
 
@@ -32,14 +34,11 @@ const payment = new Payment(client);
     payment_method_id: "pix",
     payer: {
       email,
-      identification: {
-        type: identificationType,
-        number,
-      }
+      first_name: payerName,
     },
   };
 
-  const requestOptions = { idempotencyKey: '<IDEMPOTENCY_KEY>' };
+  const requestOptions = { idempotencyKey: randomUUID() };
 
   payment.create({body, requestOptions})
   .then((response) => {
