@@ -4,6 +4,7 @@ import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import paymentsRouter from '../src/routes/payments';
+import giftsRouter from '../src/routes/gifts';
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(cookieParser());
 
 app.get('/', (req: Request, res: Response) => res.send('api casamento is running, ok!'));
 app.use('/payment', paymentsRouter);
+app.use('/gifts', giftsRouter);
 
 app.listen(PORT, () => { 
   console.log("Server running at PORT: ", PORT); 

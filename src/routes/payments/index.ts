@@ -5,8 +5,7 @@ import { randomUUID } from 'crypto';
 
 const router = Router();
 
-router.post('/pix', (req: Request, res: Response, next) => {
-
+router.post('/pix', async (req: Request, res: Response, next) => {
   const {
     transaction_amount, 
     description,
@@ -33,30 +32,69 @@ router.post('/pix', (req: Request, res: Response, next) => {
   const { environment, payment } = getPaymentCredentials();
   const idempotencyKey = environment === "prd" ? randomUUID() : '<IDEMPOTENCY_KEY>'
   const requestOptions = { idempotencyKey: idempotencyKey };
-
+  
   payment.create({body, requestOptions})
   .then((response) => {
-    res.send(response);
+    res.send({
+      id: result.id,
+      qr_code: result.point_of_interaction.transaction_data.qr_code
+    });
   })
   .catch((error) => {
     res.status(500).json(error);
   });
 });
 
-router.get('/:id', (req: Request, res: Response) => {
-  const { environment, payment } = getPaymentCredentials();
+router.post('/add/payers', async (req: Request, res: Response, next) => {
+   
+  const {
+    giftId,
+    giftName,
+    transaction_amount, 
+    description,
+    email,
+    identificationType,
+    payerName,
+    number  
+  } = req.body;
+  
+  const newPayment = await addNewPayer({
+      giftId,
+      giftName,
+      name: payerName,
+      paymentId: result.id,
+      value: transaction_amount
+    })
+
+    res.send({
+      id: newPayment,
+      gift: description,
+      qr_code: result.point_of_interaction.transaction_data.qr_code
+    });
+
+});
+
+router.get('/:id', async(req: Request, res: Response) => {
+  const payment = getPaymentCredentials().payment;
+  
   const paymentId = req.params.id;
-      console.log("response payment: ", environment)
-  payment.get({
-    id: paymentId
-  }).then((response) => {
-    console.log("response payment: ", response)
-    res.send(response);
-  })
-  .catch((error) => {
-    console.log("error payment: ", error)
-    res.status(500).json(error);
-  });
+  const payerDetails = await getPayment(paymentId);
+  
+  if (payerDetails === null){
+    return res.status(404);
+  }
+
+  if (payerDetails?.paymentId){
+    payment.get({
+      id: payerDetails?.paymentId
+    }).then((response) => { 
+      res.send(response.status);
+    })
+    .catch((error) => {
+      console.log("error payment: ", error)
+      res.status(500).json(error);
+    });
+  }
 });
 export default router;
 
