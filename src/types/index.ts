@@ -26,3 +26,8 @@ export type GiftToPay = {
   image?: string,
   qrCode: string,
 }
+
+export type GuestType = BaseType & {
+  password: string;
+  confirmed: boolean;
+}
