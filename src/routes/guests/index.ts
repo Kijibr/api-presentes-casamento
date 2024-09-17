@@ -14,6 +14,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   return res.json({
     id: guestDetails.id,
     confirmed: guestDetails.confirmed,
+    answered: guestDetails.answered,
     name: guestDetails.name
   });
 });

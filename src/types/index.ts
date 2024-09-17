@@ -30,4 +30,5 @@ export type GiftToPay = {
 export type GuestType = BaseType & {
   password: string;
   confirmed: boolean;
+  answered: boolean;
 }

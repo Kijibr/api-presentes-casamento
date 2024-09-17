@@ -29,7 +29,7 @@ export const markResponseAsync = async (userId: string, password: string, confir
   if (!querySnap.empty) {
     const guestRef = querySnap.docs[0].ref;
 
-    await updateDoc(guestRef, { confirmed });
+    await updateDoc(guestRef, { confirmed, answered: true });
     return true;
   }
   return false;
