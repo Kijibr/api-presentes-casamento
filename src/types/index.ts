@@ -13,7 +13,7 @@ export type GiftType = BaseType & {
 export type PaymentType = BaseType & {
   giftId: string,
   giftName: string,
-  paymentId: number,
+  paymentId?: number,
   qrCode?: string,
   value: number,
 }

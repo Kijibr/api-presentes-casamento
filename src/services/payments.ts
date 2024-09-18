@@ -21,8 +21,8 @@ export const addNewPayer = async (payload: PaymentType): Promise<string> => {
   }
 }
 
-export const getPayment = async (payerId: string) => {
-  const payerQuery = query(payersCollection, where("id", "==", payerId));
+export const getPayment = async (paymentId: number) => {
+  const payerQuery = query(payersCollection, where("paymentId", "==", paymentId));
   const payer = await getDocs(payerQuery);
 
   if (!payer.empty)
