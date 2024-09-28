@@ -39,14 +39,16 @@ router.post('/pix', async (req: Request, res: Response, next) => {
         name: payerName,
         paymentId: response.id,
         value: transaction_amount
+      }).then((payerResponse: string) => {
+        res.send({
+          id: payerResponse,
+          qr_code: response?.point_of_interaction?.transaction_data?.qr_code
+        });
+      }).catch((err) => res.status(400).json(
+        `Error to generate new payment ${giftId} - ${payerName}`
+      )).catch((error) => {
+        res.status(500).json(error);
       });
-      res.send({
-        id: response.id,
-        qr_code: response?.point_of_interaction?.transaction_data?.qr_code
-      });
-    })
-    .catch((error) => {
-      res.status(500).json(error);
     });
 });
 
@@ -54,8 +56,8 @@ router.get('/:id', async (req: Request, res: Response) => {
   const payment = getPaymentCredentials().payment;
 
   const paymentId = req.params.id;
-  const payerDetails = await getPayment(parseInt(paymentId));
-  
+  const payerDetails = await getPayment(paymentId);
+
   if (payerDetails === null) {
     return res.status(404).send();
   }
