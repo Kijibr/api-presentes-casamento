@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import paymentsRouter from '../src/routes/payments';
 import giftsRouter from '../src/routes/gifts';
 import guestsRouter from '../src/routes/guests';
+import webHookRouter from '../src/routes/webhook';
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.get('/', (req: Request, res: Response) => res.send('api casamento is running
 app.use('/payment', paymentsRouter);
 app.use('/gifts', giftsRouter);
 app.use('/guests', guestsRouter);
+app.use('/webhook', webHookRouter);
 
 app.listen(PORT, () => { 
   console.log("Server running at PORT: ", PORT); 
