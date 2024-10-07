@@ -3,11 +3,16 @@ import { giftsCollection } from "./firebase";
 import { GiftType } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 
-export const getAllgifts = async () => {
-  const giftsSnap = await getDocs(giftsCollection);
+const giftsCached: GiftType[] = [];
 
-  const result = giftsSnap.docs.map(item => item.data()) as GiftType[];
-  return result;
+export const getAllgifts = async () => {
+  if (giftsCached.length === 0){
+    const giftsSnap = await getDocs(giftsCollection);
+    const result = giftsSnap.docs.map(item => item.data()) as GiftType[];
+    result.forEach((item) => giftsCached.push(item));
+  }
+
+  return giftsCached;
 }
 
 export const addGifts = async (payload: GiftType) => {
