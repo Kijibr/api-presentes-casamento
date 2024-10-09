@@ -35,7 +35,6 @@ router.post('/pix', async (req: Request, res: Response, next) => {
   const requestOptions = { idempotencyKey: idempotencyKey };
   const createPayment: PaymentResponse = await payment.create({ body, requestOptions });
   if (createPayment) {
-    console.log("informacoes: ", createPayment)
     const newPayer = await addNewPayer({
       giftId,
       giftName,
