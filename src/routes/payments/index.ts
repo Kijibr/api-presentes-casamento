@@ -7,6 +7,7 @@ import { PaymentResponse } from "mercadopago/dist/clients/payment/commonTypes";
 import { PaymentCreateRequest } from "mercadopago/dist/clients/payment/create/types";
 
 const router = Router();
+const paymentWebHook = "https://api-presentes-casamento.vercel.app/webhook";
 
 router.post('/pix', async (req: Request, res: Response, next) => {
   const {
@@ -25,34 +26,33 @@ router.post('/pix', async (req: Request, res: Response, next) => {
     payer: {
       email,
       first_name: payerName
-    }, 
-    notification_url: "https://api-presentes-casamento.vercel.app/webhook"
+    },
+    notification_url: paymentWebHook
   };
 
   const { environment, payment } = getPaymentCredentials();
   const idempotencyKey = environment === "prd" ? randomUUID() : '<IDEMPOTENCY_KEY>'
   const requestOptions = { idempotencyKey: idempotencyKey };
-
-  payment.create({ body, requestOptions })
-    .then((response: PaymentResponse) => {
-      addNewPayer({
-        giftId,
-        giftName,
-        name: payerName,
-        paymentId: response.id,
-        value: transaction_amount
-      }).then((payerResponse: string) => {
-        res.send({
-          id: payerResponse,
-          qr_code: response?.point_of_interaction?.transaction_data?.qr_code
-        });
-      }).catch((err) => res.status(400).json(
-        `Error to generate new payment ${giftId} - ${payerName}`
-      )).catch((error) => {
-        res.status(500).json(error);
-      });
+  const createPayment: PaymentResponse = await payment.create({ body, requestOptions });
+  if (createPayment) {
+    console.log("informacoes: ", createPayment)
+    const newPayer = await addNewPayer({
+      giftId,
+      giftName,
+      name: payerName,
+      paymentId: createPayment.id,
+      value: transaction_amount
     });
-});
+    if (newPayer)
+      return res.send({
+        id: newPayer,
+        qr_code: createPayment?.point_of_interaction?.transaction_data?.qr_code
+      });
+  };
+
+  return res.status(400).json(
+    `Error to generate new payment ${giftId} - ${payerName}`);
+})
 
 router.get('/:id', async (req: Request, res: Response) => {
   const payment = getPaymentCredentials().payment;
