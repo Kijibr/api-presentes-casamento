@@ -12,7 +12,9 @@ dotenv.config();
 const app = express();
 
 const PORT = process.env.API_PORT || '5005';
-app.use(cors());
+app.use(cors({
+  origin: "https://igor-maria-casamento.vercel.app/"
+}));
 
 app.use(logger('dev'));
 app.use(express.json());
