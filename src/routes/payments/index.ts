@@ -4,6 +4,7 @@ import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { randomUUID } from 'crypto';
 import { addNewPayer, getPayment } from "../../services/payments";
 import { PaymentResponse } from "mercadopago/dist/clients/payment/commonTypes";
+import { PaymentCreateRequest } from "mercadopago/dist/clients/payment/create/types";
 
 const router = Router();
 
@@ -17,14 +18,15 @@ router.post('/pix', async (req: Request, res: Response, next) => {
     payerName
   } = req.body;
 
-  const body = {
+  const body: PaymentCreateRequest = {
     transaction_amount,
     description,
     payment_method_id: "pix",
     payer: {
       email,
       first_name: payerName
-    },
+    }, 
+    notification_url: "https://api-presentes-casamento.vercel.app/webhook"
   };
 
   const { environment, payment } = getPaymentCredentials();
