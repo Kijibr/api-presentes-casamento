@@ -13,7 +13,7 @@ const app = express();
 
 const PORT = process.env.API_PORT || '5005';
 app.use(cors({
-  origin: "https://igor-maria-casamento.vercel.app/"
+  origin: "https://igor-maria-casamento.vercel.app"
 }));
 
 app.use(logger('dev'));
