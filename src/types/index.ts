@@ -4,6 +4,11 @@ type BaseType = {
   name: string,
 }
 
+export enum PaymentMethods {
+  Pix,
+  CreditCard
+};
+
 export type GiftType = BaseType & {
   id: string,
   giftValue: string,
@@ -13,6 +18,7 @@ export type GiftType = BaseType & {
 export type PaymentType = BaseType & {
   giftId: string,
   giftName: string,
+  paymentMethod: PaymentMethods,
   paymentId?: number,
   qrCode?: string,
   value: number,
