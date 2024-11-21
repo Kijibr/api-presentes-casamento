@@ -116,7 +116,7 @@ router.post('/creditCard/process', async (req: Request, res: Response, next) => 
     statement_descriptor: "MERCADO_PAGO",
     external_reference: giftId,
     binary_mode: false,
-    notification_url: `${process.env.API_URI}/webhook`
+    notification_url: `${process.env.API_URL}/webhook`
   }
 
   payment.create({ body, requestOptions })
