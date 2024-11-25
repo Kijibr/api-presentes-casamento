@@ -1,32 +1,49 @@
 import { PaymentType } from "../types";
-import { payersCollection } from "./firebase";
-import { addDoc, getDocs, query, where } from "firebase/firestore/lite";
+import { paymentsCollection } from "./firebase";
+import { addDoc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
 import { v4 as uuidv4 } from 'uuid';
 
-export const addNewPayer = async (payload: PaymentType): Promise<string> => {
-  const transactionId = uuidv4(); 
+export const addNewPayment = async (payload: PaymentType): Promise<string> => {
+  const transactionId = uuidv4();
   try {
     payload = {
       ...payload,
       id: transactionId,
       createdAt: new Date().toISOString(),
-      value: parseFloat(payload.value.toString())
+      originalValue: parseFloat(payload.originalValue.toString()),
+      totalValue: parseFloat(payload.totalValue.toString())
     }
-    
-    await addDoc(payersCollection, payload);
+
+    await addDoc(paymentsCollection, payload);
     return transactionId;
   } catch (e) {
-    console.error("Error save new payer: ", e);
+    console.error("Error save new payment: ", e);
     return transactionId;
   }
 }
 
 export const getPayment = async (id: string) => {
-  const payerQuery = query(payersCollection, where("id", "==", id));
-  const payer = await getDocs(payerQuery);
+  const paymentQuery = query(paymentsCollection, where("id", "==", id));
+  const payment = await getDocs(paymentQuery);
 
-  if (!payer.empty)
-    return payer.docs[0].data() as PaymentType;
-  
+  if (!payment.empty) {
+    const result = payment.docs[0].data() as PaymentType;
+    return result;
+  }
+
   return null;
-} 
+}
+
+export const updatePaymentStatus = async (paymentId: string, status: string) => {
+  const paymentQuery = query(paymentsCollection, where("paymentId", "==", paymentId));
+  const paymentsSnap = await getDocs(paymentQuery);
+
+  if (!paymentsSnap.empty) {
+    const paymentRef = paymentsSnap.docs[0].ref;
+
+    await updateDoc(paymentRef, { status });
+    return true;
+  }
+
+  return false;
+}

@@ -16,5 +16,5 @@ const firebaseApp = initializeApp(firebaseConfig);
 export const database = getFirestore(firebaseApp);
 
 export const guestsCollection = collection(database, 'guests');
-export const payersCollection = collection(database, 'payers');
+export const paymentsCollection = collection(database, 'payments');
 export const giftsCollection = collection(database, 'gifts');

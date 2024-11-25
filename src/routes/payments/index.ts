@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { randomUUID } from 'crypto';
-import { addNewPayer, getPayment } from "../../services/payments";
+import { addNewPayment, getPayment, updatePaymentStatus } from "../../services/payments";
 import { PaymentResponse } from "mercadopago/dist/clients/payment/commonTypes";
 import { PaymentCreateRequest } from "mercadopago/dist/clients/payment/create/types";
 import { PaymentMethods } from "../../types";
@@ -42,13 +42,14 @@ router.post('/pix', async (req: Request, res: Response, next) => {
   const createPayment: PaymentResponse = await payment.create({ body, requestOptions });
 
   if (createPayment) {
-    const newPayer = await addNewPayer({
+    const newPayer = await addNewPayment({
       giftId,
       giftName,
       name: payerName,
       paymentId: createPayment.id,
       paymentMethod: PaymentMethods.Pix,
-      value: transaction_amount
+      totalValue: transaction_amount,
+      originalValue: transaction_amount,
     });
     if (newPayer)
       return res.send({
@@ -122,13 +123,16 @@ router.post('/creditCard/process', async (req: Request, res: Response, next) => 
   payment.create({ body, requestOptions })
     .then(async (result: PaymentResponse) => {
       console.log(result, JSON.stringify(result.card));
-      const newPayer = await addNewPayer({
+      const newPayer = await addNewPayment({
         giftId,
         giftName,
         name: payerName,
         paymentId: result.id,
-        paymentMethod: PaymentMethods.Pix,
-        value: transaction_amount
+        paymentMethod: PaymentMethods.CreditCard,
+        installments,
+        originalValue: transaction_amount,
+        totalValue: result.transaction_details?.total_paid_amount!,
+        installmentsValue: result.transaction_details?.installment_amount!,
       });
       return res.status(200).json({
         id: newPayer,
@@ -147,15 +151,18 @@ router.get('/:id', async (req: Request, res: Response) => {
   const { payment } = getPaymentCredentials();
 
   const paymentId = req.params.id;
-  const payerDetails = await getPayment(paymentId);
-  if (payerDetails === null) {
+  const paymentDetails = await getPayment(paymentId);
+  if (paymentDetails === null) {
     return res.status(404).send();
   }
 
-  if (payerDetails?.paymentId) {
+  if (paymentDetails?.paymentId) {
     payment.get({
-      id: payerDetails?.paymentId
+      id: paymentDetails?.paymentId
     }).then((response: PaymentResponse) => {
+      if (paymentDetails.status !== response.status)
+        updatePaymentStatus(paymentDetails?.paymentId?.toString()!, response.status!);
+      
       res.json(response.status);
     }).catch((error) => {
       console.log("error to find payment: ", error)
