@@ -134,9 +134,11 @@ router.post('/creditCard/process', async (req: Request, res: Response, next) => 
         totalValue: result.transaction_details?.total_paid_amount!,
         installmentsValue: result.transaction_details?.installment_amount!,
       });
+      
       return res.status(200).json({
-        id: newPayer,
-        status: result.status
+        id: result.id,
+        status: result.status,
+        success: result.status === "approved"
       });
 
     })
