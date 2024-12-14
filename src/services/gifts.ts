@@ -4,6 +4,7 @@ import { GiftType } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 import { getBytes, ref } from "firebase/storage";
 import sharp from "sharp";
+import { scheduleJob } from "node-schedule";
 
 const giftsCached: GiftType[] = [];
 
@@ -37,6 +38,19 @@ export const getAllgifts = async () => {
   return giftsCached;
 }
 
+export const addGifts = async (payload: GiftType) => {
+  try {
+    await addDoc(giftsCollection, {
+      ...payload,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      giftValue: parseFloat(payload.giftValue)
+    });
+  } catch (e) {
+    console.error("Error save new payer: ", e);
+  }
+}
+
 async function compressImage(imagePath: ArrayBuffer) {
   try {
     const formatted = new Uint8Array(imagePath);
@@ -50,21 +64,12 @@ async function compressImage(imagePath: ArrayBuffer) {
       .webp({ quality: 80 })
       .toBuffer();
 
-      return outputBuffer;
+    return outputBuffer;
   } catch (error) {
     console.error('Erro on processing image:', error);
   }
 }
 
-export const addGifts = async (payload: GiftType) => {
-  try {
-    await addDoc(giftsCollection, {
-      ...payload,
-      id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      giftValue: parseFloat(payload.giftValue)
-    });
-  } catch (e) {
-    console.error("Error save new payer: ", e);
-  }
-}
+scheduleJob("*/5 * * * *", async () => {
+  await getAllgifts();
+});
