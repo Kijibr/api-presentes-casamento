@@ -71,5 +71,7 @@ async function compressImage(imagePath: ArrayBuffer) {
 }
 
 scheduleJob("*/5 * * * *", async () => {
+  console.info("[SCHEDULED] - Searching gifts updates");
   await getAllgifts();
+  console.info("[SCHEDULED] - Gifts was updated");
 });
