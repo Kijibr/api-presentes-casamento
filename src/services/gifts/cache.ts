@@ -1,11 +1,12 @@
 import NodeCache from "node-cache";
 import { GiftType } from "../../types";
 
+const secondsToExpireGifts = 50000;
 const giftsCache = new NodeCache();
 
 export function SetGiftsOnCache(gifts: GiftType[]) {
   const serializedGifts = JSON.stringify(gifts);
-  giftsCache.set('gifts', serializedGifts);
+  giftsCache.set('gifts', serializedGifts, secondsToExpireGifts);
 }
 
 export function GetGiftsFromCache(): GiftType[] {
