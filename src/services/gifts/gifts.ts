@@ -1,12 +1,13 @@
 import { addDoc, getDocs } from "firebase/firestore/lite";
-import { giftsCollection, storage } from "./firebase";
-import { GiftType } from "../types";
+import { giftsCollection, storage } from "../firebase";
+import { GiftType } from "../../types";
 import { v4 as uuidv4 } from 'uuid';
 import { getBytes, ref } from "firebase/storage";
 import sharp from "sharp";
 import { scheduleJob } from "node-schedule";
+import { GetGiftsFromCache, SetGiftsOnCache } from "./cache";
 
-const giftsCached: GiftType[] = [];
+const giftsCached: GiftType[] = GetGiftsFromCache();
 
 export const getAllgifts = async () => {
   if (giftsCached.length === 0) {
@@ -72,6 +73,7 @@ async function compressImage(imagePath: ArrayBuffer) {
 
 scheduleJob("*/5 * * * *", async () => {
   console.info("[SCHEDULED] - Searching gifts updates");
-  await getAllgifts();
-  console.info("[SCHEDULED] - Gifts was updated");
+  const gifts = await getAllgifts();
+  SetGiftsOnCache(gifts);
+  console.info(`[SCHEDULED] - ${gifts?.length} gifts was found`);
 });

@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { getAllgifts } from "../../services/gifts";
+import { getAllgifts } from "../../services/gifts/gifts";
 
 const router = Router();
 
