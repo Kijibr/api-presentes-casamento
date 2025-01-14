@@ -9,7 +9,7 @@ export const addNewPayment = async (payload: PaymentType): Promise<string> => {
     payload = {
       ...payload,
       id: transactionId,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       originalValue: parseFloat(payload.originalValue.toString()),
       totalValue: parseFloat(payload.totalValue.toString())
     }

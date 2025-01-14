@@ -1,6 +1,7 @@
 type BaseType = {
-  id?: string,
-  createdAt?: string,
+  id: string,
+  createdAt: Date,
+  updatedAt?: Date,
   name: string,
 }
 
@@ -32,13 +33,17 @@ export type GiftToPay = {
   paymentId: number,
   id: string,
   name: string,
-  giftValue: string,
+  price: string,
   image?: string,
   qrCode: string,
 }
 
-export type GuestType = BaseType & {
+type UserType = BaseType & {
+  email: string;
   password: string;
+}
+
+export type GuestType = UserType & {
   confirmed: boolean;
   answered: boolean;
 }

@@ -1,11 +1,10 @@
 import { addDoc, getDocs } from "firebase/firestore/lite";
-import { giftsCollection, storage } from "../firebase";
-import { GiftType } from "../../types";
+import { giftsCollection, storage } from "../services/firebase";
+import { GiftType } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 import { getBytes, ref } from "firebase/storage";
-import sharp from "sharp";
-import { scheduleJob } from "node-schedule";
-import { GetGiftsFromCache, SetGiftsOnCache } from "./cache";
+import { GetGiftsFromCache, SetGiftsOnCache } from "../services/gifts/cache";
+import { compressImageFromBase64, compressImageFromPath } from "../services/gifts/giftsService";
 
 const giftsCached: GiftType[] = GetGiftsFromCache();
 
@@ -20,7 +19,7 @@ export const getAllgifts = async () => {
           const fileReference = ref(storage, item.image!);
 
           const imageBuffer = await getBytes(fileReference);
-          const compressed = await compressImage(imageBuffer);
+          const compressed = await compressImageFromPath(imageBuffer);
           return {
             ...item,
             image: `data:image/jpeg;base64,${compressed?.toString('base64')}`
@@ -40,40 +39,26 @@ export const getAllgifts = async () => {
 }
 
 export const addGifts = async (payload: GiftType) => {
+  const compressedImage = compressImageFromBase64(payload.image!);
+
   try {
     await addDoc(giftsCollection, {
       ...payload,
       id: uuidv4(),
       createdAt: new Date().toISOString(),
-      giftValue: parseFloat(payload.giftValue)
+      price: parseFloat(payload.price),
+      image: compressedImage
     });
+    return true;
   } catch (e) {
     console.error("Error save new payer: ", e);
+    return false;
   }
 }
 
-async function compressImage(imagePath: ArrayBuffer) {
-  try {
-    const formatted = new Uint8Array(imagePath);
-    const outputBuffer = await sharp(formatted)
-      .resize({
-        width: 1920,
-        height: 1080,
-        fit: sharp.fit.inside,
-        withoutEnlargement: true,
-      })
-      .webp({ quality: 80 })
-      .toBuffer();
-
-    return outputBuffer;
-  } catch (error) {
-    console.error('Erro on processing image:', error);
-  }
-}
-
-scheduleJob("*/5 * * * *", async () => {
+export const addGiftsToCache = async () => {
   console.info("[SCHEDULED] - Searching gifts updates");
   const gifts = await getAllgifts();
   SetGiftsOnCache(gifts);
   console.info(`[SCHEDULED] - ${gifts?.length} gifts was found`);
-});
+};
