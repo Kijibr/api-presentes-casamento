@@ -1,5 +1,6 @@
 {
   "name": "api-presentes-casamento",
+  "license": "MIT",
   "version": "0.1.0",
   "scripts": {
     "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules ./api/index.ts",

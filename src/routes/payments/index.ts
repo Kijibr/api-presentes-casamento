@@ -5,9 +5,8 @@ import { randomUUID } from 'crypto';
 import { addNewPayment, getPayment, updatePaymentStatus } from "../../services/payments";
 import { PaymentResponse } from "mercadopago/dist/clients/payment/commonTypes";
 import { PaymentCreateRequest } from "mercadopago/dist/clients/payment/create/types";
-import { PaymentMethods } from "../../types";
-
-require('dotenv').config();
+import { PaymentMethods, PaymentModel } from "../../types";
+import { appConfig } from "../../config/keys";
 
 // const { environment, payment } = getPaymentCredentials();
 const router = Router();
@@ -19,7 +18,7 @@ router.post('/pix', async (req: Request, res: Response, next) => {
     giftName,
     transaction_amount,
     description,
-    email = process.env.DEFAULT_EMAIL,
+    email = appConfig.defaultEmail,
     payerName
   } = req.body;
 
@@ -42,19 +41,25 @@ router.post('/pix', async (req: Request, res: Response, next) => {
   const createPayment: PaymentResponse = await payment.create({ body, requestOptions });
 
   if (createPayment) {
-    const newPayer = await addNewPayment({
+    const qrCode = createPayment?.point_of_interaction?.transaction_data?.qr_code_base64!;
+    const newPayer = await addNewPayment(new PaymentModel(
       giftId,
       giftName,
-      name: payerName,
-      paymentId: createPayment.id,
-      paymentMethod: PaymentMethods.Pix,
-      totalValue: transaction_amount,
-      originalValue: transaction_amount,
-    });
+      payerName,
+      PaymentMethods.Pix,
+      parseFloat(transaction_amount.toString()),
+      parseFloat(transaction_amount.toString()),
+      undefined,
+      undefined,
+      createPayment.id,
+      qrCode,
+      createPayment.status
+    ));
+
     if (newPayer)
       return res.send({
         id: newPayer,
-        qr_code: createPayment?.point_of_interaction?.transaction_data?.qr_code
+        qr_code: qrCode
       });
   };
 
@@ -72,7 +77,7 @@ router.post('/creditCard/process', async (req: Request, res: Response, next) => 
     token,
     payment_method_id,
     issuer_id,
-    email = process.env.DEFAULT_EMAIL,
+    email = appConfig.defaultEmail,
     payer,
     payerName
   } = req.body;
@@ -117,24 +122,26 @@ router.post('/creditCard/process', async (req: Request, res: Response, next) => 
     statement_descriptor: "MERCADO_PAGO",
     external_reference: giftId,
     binary_mode: false,
-    notification_url: `${process.env.API_URL}/webhook`
+    notification_url: `${appConfig.appUrl}/webhook`
   }
 
   payment.create({ body, requestOptions })
     .then(async (result: PaymentResponse) => {
       console.log(result, JSON.stringify(result.card));
-      const newPayer = await addNewPayment({
+      const newPayer = await addNewPayment(new PaymentModel(
         giftId,
         giftName,
-        name: payerName,
-        paymentId: result.id,
-        paymentMethod: PaymentMethods.CreditCard,
+        payerName,
+        PaymentMethods.CreditCard,
+        result.transaction_details?.total_paid_amount!,
+        transaction_amount,
         installments,
-        originalValue: transaction_amount,
-        totalValue: result.transaction_details?.total_paid_amount!,
-        installmentsValue: result.transaction_details?.installment_amount!,
-      });
-      
+        result.transaction_details?.installment_amount!,
+        result.id,
+        undefined,
+        result.status
+      ));
+
       return res.status(200).json({
         id: result.id,
         status: result.status,
@@ -164,7 +171,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     }).then((response: PaymentResponse) => {
       if (paymentDetails.status !== response.status)
         updatePaymentStatus(paymentDetails?.paymentId?.toString()!, response.status!);
-      
+
       res.json(response.status);
     }).catch((error) => {
       console.log("error to find payment: ", error)
@@ -175,8 +182,8 @@ router.get('/:id', async (req: Request, res: Response) => {
 export default router;
 
 function getPaymentCredentials() {
-  const environment = process.env.ENVIRONMENT;
-  const mpAccessToken = environment === "prd" ? process.env.MP_ACCESS_TOKEN : process.env.MP_ACCESS_TOKEN_DEV;
+  const environment = appConfig.environment;
+  const mpAccessToken = environment === "prd" ? appConfig.mercadoPagoAccessToken : appConfig.mercadoPagoAccessTokenDev;
   const client = new MercadoPagoConfig({
     accessToken: mpAccessToken!,
     options: {

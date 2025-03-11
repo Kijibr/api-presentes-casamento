@@ -1,24 +1,20 @@
-import { PaymentType } from "../types";
+import { PaymentModel } from "../types";
 import { paymentsCollection } from "./firebase";
 import { addDoc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
-import { v4 as uuidv4 } from 'uuid';
 
-export const addNewPayment = async (payload: PaymentType): Promise<string> => {
-  const transactionId = uuidv4();
+export const addNewPayment = async (payload: PaymentModel): Promise<string> => {
   try {
     payload = {
       ...payload,
-      id: transactionId,
-      createdAt: new Date(),
       originalValue: parseFloat(payload.originalValue.toString()),
       totalValue: parseFloat(payload.totalValue.toString())
     }
 
     await addDoc(paymentsCollection, payload);
-    return transactionId;
+    return payload.id;
   } catch (e) {
     console.error("Error save new payment: ", e);
-    return transactionId;
+    return payload.id;
   }
 }
 
@@ -27,7 +23,7 @@ export const getPayment = async (id: string) => {
   const payment = await getDocs(paymentQuery);
 
   if (!payment.empty) {
-    const result = payment.docs[0].data() as PaymentType;
+    const result = payment.docs[0].data() as PaymentModel;
     return result;
   }
 
