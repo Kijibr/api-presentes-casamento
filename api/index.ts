@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import paymentsRouter from '../src/routes/payments';
 import giftsRouter from '../src/routes/gifts';
 import guestsRouter from '../src/routes/guests';

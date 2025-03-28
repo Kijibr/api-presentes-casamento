@@ -22,7 +22,7 @@ export const appConfig = {
 
 };
 
-// Verifica se as variáveis de ambiente estão definidas
+// Check if environment variables are defined
 if (!appConfig.fbApiKey || !appConfig.storageBucket || !appConfig.fbMessagingSenderId || !appConfig.fbAppId || !appConfig.fbMeasurementId) {
-  throw new Error("As variáveis de ambiente da base de dados não estão definidas.");
+  throw new Error("Database environment variables are not defined.");
 } 

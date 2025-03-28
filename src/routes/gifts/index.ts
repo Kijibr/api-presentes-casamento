@@ -1,15 +1,17 @@
 import { Request, Response, Router } from "express";
 import { addGiftsAsync, addGiftsToCache, getAllgiftsAsync, removeGiftsAsync, updateGiftsAsync } from "../../controllers/giftsController";
 import { GiftModel } from "../../types";
+import { LogError } from "../../services/logger";
 
 const router = Router();
 
 router.get("/list", async (req: Request, res: Response) => {
   try {
     const giftsList = await getAllgiftsAsync();
-    return res.send(giftsList);
+    return res.json(giftsList);
   } catch (error) {
-    res.json(error);
+    LogError(`Error getting gifts list: ${error}`);
+    return res.status(500).json({ error: "Error fetching gifts" });
   }
 });
 
@@ -18,7 +20,8 @@ router.get("/updateGiftsList", async (req: Request, res: Response) => {
     await addGiftsToCache();
     return res.sendStatus(204);
   } catch (error) {
-    res.json(error);
+    LogError(`Error updating gifts list: ${error}`);
+    return res.status(500).json({ error: "Error updating gifts list" });
   }
 });
 
@@ -35,18 +38,21 @@ router.post("/add", async (req: Request, res: Response) => {
       availability
     );
 
-    const newGift = await addGiftsAsync(giftPayload, fileName);
-    if (newGift) {
-      return res.status(201).send({ id: giftPayload.id });
-    }
+    await addGiftsAsync(giftPayload, fileName);
+    return res.status(201).json({ id: giftPayload.id });
   } catch (error) {
-    res.json(error);
+    LogError(`Error adding gift: ${error}`);
+    return res.status(500).json({ error: "Error adding gift" });
   }
 });
 
 router.patch("/update", async (req: Request, res: Response) => {
   try {
-    const { name, price, giverId, eventId, image, fileName, availability } = req.body;
+    const { name, price, giverId, eventId, image, fileName, availability, id } = req.body;
+
+    if (!id || !name || !price || !eventId) {
+      return res.status(400).json({ error: "Required fields not provided" });
+    }
 
     const giftPayload = new GiftModel(
       name,
@@ -56,22 +62,36 @@ router.patch("/update", async (req: Request, res: Response) => {
       image,
       availability
     );
-    const newGift = await updateGiftsAsync(giftPayload, fileName);
-    if (newGift) {
-      return res.sendStatus(204);
+
+    const updated = await updateGiftsAsync(giftPayload, fileName);
+    if (!updated) {
+      return res.status(404).json({ error: "Gift not found" });
     }
+
+    return res.sendStatus(204);
   } catch (error) {
-    res.json(error);
+    LogError(`Error updating gift: ${error}`);
+    return res.status(500).json({ error: "Error updating gift" });
   }
 });
 
 router.delete("/remove", async (req: Request, res: Response) => {
   try {
     const giftId = req.params.giftId;
-    await removeGiftsAsync(giftId);
+    if (!giftId) {
+      return res.status(400).json({ error: "Gift ID not provided" });
+    }
+
+    const removed = await removeGiftsAsync(giftId);
+    if (!removed) {
+      return res.status(404).json({ error: "Gift not found" });
+    }
+
     return res.sendStatus(204);
   } catch (error) {
-    res.json(error);
+    LogError(`Error removing gift: ${error}`);
+    return res.status(500).json({ error: "Error removing gift" });
   }
-})
+});
+
 export default router;

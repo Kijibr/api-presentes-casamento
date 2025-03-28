@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
+import { LogError } from "../logger";
 
 /**
  * Comprime uma imagem a partir de um caminho fornecido.
@@ -15,6 +16,10 @@ import { storage } from "../firebase";
  */
 export async function compressImageFromPath(imagePath: ArrayBuffer) {
   try {
+    if (!imagePath || imagePath.byteLength === 0) {
+      throw new Error("Invalid image buffer");
+    }
+
     const formatted = new Uint8Array(imagePath);
     const outputBuffer = await sharp(formatted)
       .resize({
@@ -26,11 +31,17 @@ export async function compressImageFromPath(imagePath: ArrayBuffer) {
       .webp({ quality: 80 })
       .toBuffer();
 
+    if (!outputBuffer || outputBuffer.length === 0) {
+      throw new Error("Failed to compress image");
+    }
+
     return outputBuffer;
   } catch (error) {
-    console.error('Erro on processing image:', error);
+    LogError(`Error processing image: ${error}`);
+    throw new Error("Failed to process image");
   }
 }
+
 /**
  * Convert a base64 image to WebP
  * @param {string} base64 - String base64 representando a imagem.
@@ -38,8 +49,19 @@ export async function compressImageFromPath(imagePath: ArrayBuffer) {
  */
 export async function compressImageFromBase64(base64Image: string) {
   try {
-    const base64Data: string = base64Image.replace(/^data:image\/\w+;base64,/, '');
-    const buffer: Buffer<ArrayBuffer> = Buffer.from(base64Data, 'base64');
+    if (!base64Image) {
+      throw new Error("Base64 image not provided");
+    }
+
+    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+    if (!base64Data) {
+      throw new Error("Invalid base64 image format");
+    }
+
+    const buffer = Buffer.from(base64Data, 'base64');
+    if (!buffer || buffer.length === 0) {
+      throw new Error("Failed to convert base64 to buffer");
+    }
 
     const outputBuffer = await sharp(buffer)
       .resize({
@@ -51,9 +73,14 @@ export async function compressImageFromBase64(base64Image: string) {
       .webp({ quality: 80 })
       .toBuffer();
 
+    if (!outputBuffer || outputBuffer.length === 0) {
+      throw new Error("Failed to compress image");
+    }
+
     return outputBuffer;
   } catch (error) {
-    console.error('Erro on processing image:', error);
+    LogError(`Error processing base64 image: ${error}`);
+    throw new Error("Failed to process image");
   }
 }
 
@@ -65,17 +92,27 @@ export async function compressImageFromBase64(base64Image: string) {
  */
 export async function saveImageToFirebaseStorage(imageBuffer: ArrayBuffer, fileName: string, eventId: string): Promise<string> {
   try {
+    if (!imageBuffer || imageBuffer.byteLength === 0) {
+      throw new Error("Invalid image buffer");
+    }
+
+    if (!fileName || !eventId) {
+      throw new Error("File name or event ID not provided");
+    }
+
     const storageRef = ref(storage, `/images/${eventId}/${fileName}`);
     const uint8Array = new Uint8Array(imageBuffer);
 
-    // Faz o upload da imagem
     await uploadBytes(storageRef, uint8Array);
-
-    // Obtém a URL da imagem
     const downloadURL = await getDownloadURL(storageRef);
+
+    if (!downloadURL) {
+      throw new Error("Failed to get image URL");
+    }
+
     return downloadURL;
   } catch (error) {
-    console.error('Error saving image to Firebase Storage:', error);
-    throw new Error('Failed to save the image.');
+    LogError(`Error saving image to Firebase Storage: ${error}`);
+    throw new Error("Failed to save image");
   }
 }
