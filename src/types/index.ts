@@ -10,8 +10,8 @@ class BaseType {
 }
 
 export enum PaymentMethods {
-  Pix,
-  CreditCard
+  Pix = "pix",
+  CreditCard = "credit_card"
 };
 
 export class GiftModel extends BaseType {
@@ -57,6 +57,7 @@ export type EventType = BaseType & {
 export class PaymentModel extends BaseType {
   giftId: string;
   giftName: string;
+  payerName: string;
   paymentMethod: PaymentMethods;
   installments?: number;
   paymentId?: number;
@@ -65,12 +66,13 @@ export class PaymentModel extends BaseType {
   originalValue: number;
   installmentsValue?: number;
   status?: string;
-  name: string;
+  expiresAt: string;
+  isExpired: boolean;
 
   constructor(
     giftId: string,
     giftName: string,
-    name: string,
+    payerName: string,
     paymentMethod: PaymentMethods,
     totalValue: number,
     originalValue: number,
@@ -83,15 +85,20 @@ export class PaymentModel extends BaseType {
     super();
     this.giftId = giftId;
     this.giftName = giftName;
-    this.name = name;
+    this.payerName = payerName;
     this.paymentMethod = paymentMethod;
-    this.totalValue = totalValue;
     this.originalValue = originalValue;
+    this.totalValue = totalValue;
     this.installments = installments;
     this.installmentsValue = installmentsValue;
     this.paymentId = paymentId;
     this.qrCode = qrCode;
     this.status = status;
+
+    const expirationDate = new Date();
+    expirationDate.setSeconds(expirationDate.getSeconds() + 30);
+    this.expiresAt = expirationDate.toISOString();
+    this.isExpired = false;
   }
 }
 
