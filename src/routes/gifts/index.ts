@@ -2,8 +2,10 @@ import { Request, Response, Router } from "express";
 import { addGiftsAsync, addGiftsToCache, getAllgiftsAsync, removeGiftsAsync, updateGiftsAsync } from "../../controllers/giftsController";
 import { GiftModel } from "../../types";
 import { LogError } from "../../services/logger";
+import { uploadMiddleware } from "../../../api/middlewares/files";
 
 const router = Router();
+
 
 router.get("/list", async (req: Request, res: Response) => {
   try {
@@ -25,28 +27,32 @@ router.get("/updateGiftsList", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/add", async (req: Request, res: Response) => {
+router.post("/add", uploadMiddleware, async (req: Request, res: Response) => {
   try {
-    const { name, price, giverId, eventId, image, fileName, availability } = req.body;
-
-    const giftPayload = new GiftModel(
-      name,
-      price,
-      giverId,
-      eventId,
-      image,
-      availability
+    const giftData = JSON.parse(req.body.gift);
+    const gift = new GiftModel(
+      giftData.name,
+      giftData.price,
+      giftData.giverId,
+      giftData.eventId,
+      giftData.image,
+      giftData.availability
     );
 
-    await addGiftsAsync(giftPayload, fileName);
-    return res.status(201).json({ id: giftPayload.id });
+    const fileName = req.file?.originalname || '';
+    const newGiftId = await addGiftsAsync(gift, fileName);
+    if (!newGiftId) {
+      return res.status(500).json({ error: "Error creating gift" });
+    }
+
+    return res.status(201).json({ id: newGiftId });
   } catch (error) {
-    LogError(`Error adding gift: ${error}`);
-    return res.status(500).json({ error: "Error adding gift" });
+    LogError(`Error creating gift: ${error}`);
+    return res.status(500).json({ error: "Error creating gift" });
   }
 });
 
-router.patch("/update", async (req: Request, res: Response) => {
+router.patch("/update/:giftId", uploadMiddleware, async (req: Request, res: Response) => {
   try {
     const { name, price, giverId, eventId, image, fileName, availability, id } = req.body;
 
@@ -62,6 +68,8 @@ router.patch("/update", async (req: Request, res: Response) => {
       image,
       availability
     );
+    const { giftId } = req.params;
+    giftPayload.id = giftId;
 
     const updated = await updateGiftsAsync(giftPayload, fileName);
     if (!updated) {
@@ -75,9 +83,9 @@ router.patch("/update", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/remove", async (req: Request, res: Response) => {
+router.delete("/remove/:giftId", async (req: Request, res: Response) => {
   try {
-    const giftId = req.params.giftId;
+    const { giftId } = req.params;
     if (!giftId) {
       return res.status(400).json({ error: "Gift ID not provided" });
     }
