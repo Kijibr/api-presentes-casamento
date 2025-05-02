@@ -1,11 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
-class BaseType {
+export class BaseType {
   id: string;
   createdAt: string = new Date().toISOString();
   updatedAt?: string;
 
   constructor() {
     this.id = uuidv4();
+  }
+
+  updateItem?() {
+    this.updatedAt = new Date().toISOString();
   }
 }
 
