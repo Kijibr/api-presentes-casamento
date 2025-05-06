@@ -6,7 +6,7 @@ export class MenuItem extends BaseType {
   price: number;
   category: string;
   isAvailable: boolean;
-  
+
   constructor(
     name: string,
     description: string,
@@ -20,6 +20,20 @@ export class MenuItem extends BaseType {
     this.price = price;
     this.category = category;
     this.isAvailable = isAvailable;
+  }
+
+  static fromFirestore(data: any): MenuItem {
+    const instance = new MenuItem(
+      data.name!,
+      data.description!,
+      data.price!,
+      data.category!,
+      data.isAvailable);
+
+    instance.id = data.id;
+    instance.createdAt = data.createdAt;
+
+    return instance;
   }
 }
 

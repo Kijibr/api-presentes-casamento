@@ -8,8 +8,20 @@ export class BaseType {
     this.id = uuidv4();
   }
 
-  updateItem?() {
+  applyUpdates?(dto: Partial<this>): void {
+    const readonlyFields = ['id', 'createdAt'];
+
+    for (const key in dto) {
+      if (
+        dto[key] !== undefined &&
+        !readonlyFields.includes(key)
+      ) {
+        (this as any)[key] = dto[key];
+      }
+    }
+
     this.updatedAt = new Date().toISOString();
+    return;
   }
 }
 

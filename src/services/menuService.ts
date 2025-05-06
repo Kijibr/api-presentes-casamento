@@ -1,9 +1,11 @@
+import { addDoc, deleteDoc, getDocs, query, updateDoc, where } from 'firebase/firestore/lite';
 import { MenuItem, CreateMenuItemDTO, UpdateMenuItemDTO } from '../types/menu';
+import { menuCollection } from './firebase';
+import { LogError } from './logger';
 
-class MenuService {
-  private menuItems: MenuItem[] = [];
 
-  async createMenuItem(data: CreateMenuItemDTO): Promise<MenuItem> {
+export async function createMenuItem(data: CreateMenuItemDTO): Promise<string | null> {
+  try {
     const newItem = new MenuItem(
       data.name,
       data.description,
@@ -12,41 +14,76 @@ class MenuService {
       data.isAvailable
     );
 
-    this.menuItems.push(newItem);
-    return newItem;
-  }
+    const docRef = await addDoc(menuCollection, { ...newItem })
 
-  async getMenuItems(): Promise<MenuItem[]> {
-    return this.menuItems;
-  }
-
-  async getMenuItemById(id: string): Promise<MenuItem | null> {
-    return this.menuItems.find(item => item.id === id) || null;
-  }
-
-  async updateMenuItem(id: string, data: UpdateMenuItemDTO): Promise<MenuItem | null> {
-    const index = this.menuItems.findIndex(item => item.id === id);
-    if (index === -1) return null;
-
-    const item = this.menuItems[index];
-    
-    if (data.name) item.name = data.name;
-    if (data.description) item.description = data.description;
-    if (data.price) item.price = data.price;
-    if (data.category) item.category = data.category;
-    if (data.isAvailable !== undefined) item.isAvailable = data.isAvailable;
-
-    item.updateItem!();
-    return item;
-  }
-
-  async deleteMenuItem(id: string): Promise<boolean> {
-    const index = this.menuItems.findIndex(item => item.id === id);
-    if (index === -1) return false;
-
-    this.menuItems.splice(index, 1);
-    return true;
+    return docRef.id;
+  } catch (error) {
+    LogError(`Error creating menu item: ${error}`);
+    return null;
   }
 }
 
-export const menuService = new MenuService(); 
+export async function getAllMenuItems(): Promise<MenuItem[]> {
+  try {
+    const menuSnapshot = await getDocs(menuCollection);
+    return menuSnapshot.docs.map(doc => doc.data()) as MenuItem[];
+  } catch (error) {
+    LogError(`Error getting all menu items: ${error}`);
+    return [];
+  }
+}
+
+export async function getMenuItemById(id: string): Promise<MenuItem | null> {
+  try {
+    const menuQuery = query(menuCollection, where("id", "==", id))
+    const menuDoc = await getDocs(menuQuery);
+
+    if (menuDoc.empty) {
+      return null;
+    }
+
+    return menuDoc.docs[0].data() as MenuItem;
+  } catch (error) {
+    LogError(`Error getting menu item: ${error}`);
+    return null;
+  }
+}
+
+export async function updateMenuItem(id: string, data: UpdateMenuItemDTO): Promise<boolean> {
+  try {
+    const menuQuery = query(menuCollection, where("id", "==", id))
+    const menuDoc = await getDocs(menuQuery);
+
+    if (menuDoc.empty) {
+      return false;
+    }
+
+    const rawData = menuDoc.docs[0].data() as MenuItem;
+    const currentDocInstance = MenuItem.fromFirestore(rawData!);;
+
+    currentDocInstance.applyUpdates!(data);
+
+    await updateDoc(menuDoc.docs[0].ref, { ...currentDocInstance });
+    return true;
+  } catch (error) {
+    LogError(`Error updating menu item: ${error}`);
+    return false;
+  }
+}
+
+export async function deleteMenuItem(id: string): Promise<boolean> {
+  try {
+    const menuQuery = query(menuCollection, where("id", "==", id))
+    const querySnap = await getDocs(menuQuery);
+
+    if (querySnap.empty) {
+      return false;
+    }
+
+    await Promise.all(querySnap.docs.map(doc => deleteDoc(doc.ref)));
+    return true;
+  } catch (error) {
+    LogError(`Error deleting menu item: ${error}`);
+    return false;
+  }
+}

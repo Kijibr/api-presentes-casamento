@@ -57,7 +57,7 @@ export const updatePaymentStatus = async (paymentId: string, status: string) => 
       await updateDoc(payment.docs[0].ref, { status });
       return true;
     }
-
+    
     return false;
   } catch (e) {
     LogError(`Error updating payment status: ${e}`);

@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { menuService } from '../services/menuService';
+import { createMenuItem, getMenuItemById, updateMenuItem, deleteMenuItem, getAllMenuItems } from '../services/menuService';
 import { CreateMenuItemDTO, UpdateMenuItemDTO } from '../types/menu';
 
 export class MenuController {
   async createMenuItem(req: Request, res: Response) {
     try {
       const data: CreateMenuItemDTO = req.body;
-      
+
       if (!data.name || !data.description || !data.price || !data.category) {
         return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos' });
       }
@@ -15,7 +15,13 @@ export class MenuController {
         return res.status(400).json({ error: 'O preço não pode ser negativo' });
       }
 
-      const menuItem = await menuService.createMenuItem(data);
+      const menuItemId = await createMenuItem(data);
+
+      if (!menuItemId) {
+        return res.status(500).json({ error: 'Erro ao criar item do cardápio' });
+      }
+
+      const menuItem = await getMenuItemById(menuItemId);
       return res.status(201).json(menuItem);
     } catch (error) {
       return res.status(500).json({ error: 'Erro ao criar item do cardápio' });
@@ -24,7 +30,7 @@ export class MenuController {
 
   async getMenuItems(req: Request, res: Response) {
     try {
-      const menuItems = await menuService.getMenuItems();
+      const menuItems = await getAllMenuItems();
       return res.json(menuItems);
     } catch (error) {
       return res.status(500).json({ error: 'Erro ao buscar itens do cardápio' });
@@ -34,7 +40,7 @@ export class MenuController {
   async getMenuItemById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const menuItem = await menuService.getMenuItemById(id);
+      const menuItem = await getMenuItemById(id);
 
       if (!menuItem) {
         return res.status(404).json({ error: 'Item do cardápio não encontrado' });
@@ -55,12 +61,13 @@ export class MenuController {
         return res.status(400).json({ error: 'O preço não pode ser negativo' });
       }
 
-      const menuItem = await menuService.updateMenuItem(id, data);
+      const updated = await updateMenuItem(id, data);
 
-      if (!menuItem) {
+      if (!updated) {
         return res.status(404).json({ error: 'Item do cardápio não encontrado' });
       }
 
+      const menuItem = await getMenuItemById(id);
       return res.json(menuItem);
     } catch (error) {
       return res.status(500).json({ error: 'Erro ao atualizar item do cardápio' });
@@ -70,7 +77,7 @@ export class MenuController {
   async deleteMenuItem(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const deleted = await menuService.deleteMenuItem(id);
+      const deleted = await deleteMenuItem(id);
 
       if (!deleted) {
         return res.status(404).json({ error: 'Item do cardápio não encontrado' });
