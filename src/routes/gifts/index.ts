@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { addGiftsAsync, addGiftsToCache, getAllgiftsAsync, removeGiftsAsync, updateGiftsAsync } from "../../controllers/giftsController";
 import { GiftModel } from "../../types";
 import { LogError } from "../../services/logger";
-import { uploadMiddleware } from "../../../api/middlewares/files";
+import { uploadMiddleware } from "../../middlewares/files";
 
 const router = Router();
 

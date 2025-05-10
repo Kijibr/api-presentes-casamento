@@ -5,7 +5,7 @@ import guestsRoutes from './guests';
 import paymentsRoutes from './payments';
 import webhookRoutes from './webhook';
 import menu from './menu';
-import { authMiddleware } from '../../api/middlewares/auth';
+import { authMiddleware } from '../middlewares/auth';
 
 const router = Router();
 

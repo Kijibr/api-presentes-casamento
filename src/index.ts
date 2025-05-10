@@ -2,9 +2,9 @@ import express, { Request, Response } from "express";
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
-import { LogInformation } from "../src/services/logger";
-import { appConfig } from "../src/config/keys";
-import routes from "../src/routes";
+import { LogInformation } from "./services/logger";
+import { appConfig } from "./config/keys";
+import routes from "./routes";
 
 const app = express();
 
