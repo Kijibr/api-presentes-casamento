@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/index.ts",
-    "build": "rm -rf dist && tsc",
+    "build": "tsc",
     "start": "node dist/api/index.js"
   },
   "dependencies": {
