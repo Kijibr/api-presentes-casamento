@@ -26,7 +26,10 @@ app.use((req: Request, res: Response, next: Function) => {
   next();
 });
 
-app.get('/', (req: Request, res: Response) => res.send('api casamento is running, ok!'));
+console.log('inicializado API')
+app.get('/', (req: Request, res: Response) => {
+  res.send('api casamento is running, ok!')
+});
 
 app.use('/api', routes);
 
