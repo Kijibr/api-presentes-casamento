@@ -1,7 +1,7 @@
 import { addDoc, deleteDoc, getDocs, query, updateDoc, where } from 'firebase/firestore/lite';
-import { MenuItem, CreateMenuItemDTO, UpdateMenuItemDTO } from '../types/menu';
-import { menuCollection } from './firebase';
-import { LogError } from './logger';
+import { MenuItem, CreateMenuItemDTO, UpdateMenuItemDTO } from '../../types/menu';
+import { menuCollection } from '../firebase';
+import { LogError } from '../logger';
 
 
 export async function createMenuItem(data: CreateMenuItemDTO): Promise<string | null> {

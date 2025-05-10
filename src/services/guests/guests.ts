@@ -1,6 +1,6 @@
 import { addDoc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
-import { guestsCollection } from "./firebase";
-import { GuestType } from "../types";
+import { guestsCollection } from "../firebase";
+import { GuestType } from "../../types";
 
 export const getAllGuests = async () => {
   const guestsSnap = await getDocs(guestsCollection);

@@ -1,7 +1,7 @@
-import { PaymentModel } from "../types";
-import { paymentsCollection } from "./firebase";
+import { PaymentModel } from "../../types";
+import { paymentsCollection } from "../firebase";
 import { addDoc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
-import { LogError } from "./logger";
+import { LogError } from "../logger";
 
 export const addNewPayment = async (payload: PaymentModel): Promise<string> => {
   try {

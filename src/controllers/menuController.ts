@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createMenuItem, getMenuItemById, updateMenuItem, deleteMenuItem, getAllMenuItems } from '../services/menuService';
+import { createMenuItem, getMenuItemById, updateMenuItem, deleteMenuItem, getAllMenuItems } from '../services/menu/menuService';
 import { CreateMenuItemDTO, UpdateMenuItemDTO } from '../types/menu';
 
 export class MenuController {
