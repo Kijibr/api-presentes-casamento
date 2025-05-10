@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules ./api/index.ts",
-    "build": "tsc"
+    "build": "rm -rf dist && tsc",
+    "start": "node dist/api/index.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
