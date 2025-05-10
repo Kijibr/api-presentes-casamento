@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2016", 
-    "module": "commonjs",   
+    "target": "es2016",
+    "module": "commonjs",
     "esModuleInterop": true,
     "outDir": "./dist",
     "forceConsistentCasingInFileNames": true,
@@ -10,5 +10,6 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true
   },
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
