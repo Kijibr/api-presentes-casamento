@@ -1,6 +1,7 @@
 import { BaseType } from ".";
 
 export class MenuItem extends BaseType {
+  eventId: string;
   name: string;
   description: string;
   price: number;
@@ -8,6 +9,7 @@ export class MenuItem extends BaseType {
   isAvailable: boolean;
 
   constructor(
+    eventId: string,
     name: string,
     description: string,
     price: number,
@@ -15,6 +17,7 @@ export class MenuItem extends BaseType {
     isAvailable: boolean = true,
   ) {
     super();
+    this.eventId = eventId;
     this.name = name;
     this.description = description;
     this.price = price;
@@ -38,6 +41,7 @@ export class MenuItem extends BaseType {
 }
 
 export interface CreateMenuItemDTO {
+  eventId: string;
   name: string;
   description: string;
   price: number;

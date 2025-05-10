@@ -7,6 +7,7 @@ import { LogError } from '../logger';
 export async function createMenuItem(data: CreateMenuItemDTO): Promise<string | null> {
   try {
     const newItem = new MenuItem(
+      data.eventId,
       data.name,
       data.description,
       data.price,
