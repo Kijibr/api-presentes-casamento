@@ -1,38 +1,46 @@
-import { addDoc, getDocs, query, where } from "firebase/firestore/lite";
+import { addDoc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
 import { guestsCollection } from "../firebase";
-import { LogError } from "../logger";
+import { GuestType } from "../../types";
 
-export const getGuest = async (id: string) => {
-  try {
-    if (!id) {
-      throw new Error("Guest ID not provided");
-    }
+export const getAllGuests = async () => {
+  const guestsSnap = await getDocs(guestsCollection);
 
-    const guestQuery = query(guestsCollection, where("id", "==", id));
-    const guest = await getDocs(guestQuery);
+  const result = guestsSnap.docs.map(item => item.data());
+  return result;
+}
 
-    if (!guest.empty) {
-      return guest.docs[0].data();
-    }
+export const getGuest = async (userId: string) => {
+  const payerQuery = query(guestsCollection, where("id", "==", userId));
+  const payer = await getDocs(payerQuery);
 
-    return null;
-  } catch (e) {
-    LogError(`Error getting guest: ${e}`);
-    throw new Error("Error fetching guest");
+  if (!payer.empty)
+    return payer.docs[0].data() as GuestType;
+}
+
+export const markResponseAsync = async (userId: string, password: string, confirmed: boolean) => {
+  const payerQuery = query(
+    guestsCollection,
+    where("id", "==", userId),
+    where("password", "==", password)
+  );
+
+  const querySnap = await getDocs(payerQuery);
+
+  if (!querySnap.empty) {
+    const guestRef = querySnap.docs[0].ref;
+
+    await updateDoc(guestRef, { confirmed, answered: true });
+    return true;
   }
+  return false;
 }
 
 export const addNewGuest = async (name: string) => {
   try {
-    if (!name) {
-      throw new Error("Guest name not provided");
-    }
-
     await addDoc(guestsCollection, {
       name,
     });
   } catch (e) {
-    LogError(`Error adding new guest: ${e}`);
-    throw new Error("Error adding guest");
+    console.error("Error adding document: ", e);
   }
-} 
+}
