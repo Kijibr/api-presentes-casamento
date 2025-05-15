@@ -5,7 +5,6 @@ import cors from 'cors';
 import { LogInformation } from './services/logger';
 import { appConfig } from './config/keys';
 import routes from './routes';
-import serverless from 'serverless-http';
 
 const app = express();
 const PORT = appConfig.appPort || 5005;
@@ -22,7 +21,7 @@ app.use((req: Request, res: Response, next) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  res.json('API casamento is running, ok!');
+  res.send('API casamento is running, ok!');
 });
 
 app.use('/api', routes);
@@ -33,4 +32,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-export default serverless(app);
+export default app;
