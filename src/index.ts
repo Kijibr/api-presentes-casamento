@@ -22,7 +22,7 @@ app.use((req: Request, res: Response, next) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('API casamento is running, ok!');
+  res.json('API casamento is running, ok!');
 });
 
 app.use('/api', routes);
@@ -33,5 +33,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// ✅ Exportar sempre fora de qualquer bloco condicional
-export const handler = serverless(app);
+export default serverless(app);

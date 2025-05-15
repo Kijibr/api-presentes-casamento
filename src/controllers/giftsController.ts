@@ -67,7 +67,9 @@ export const addGiftsAsync = async (payload: GiftModel, fileName: string) => {
       if (!compressedImageBuffer) {
         throw new Error("Error compressing image");
       }
-      imageUrl = await saveImageToFirebaseStorage(compressedImageBuffer.buffer, fileName, payload.eventId);
+      const uint8Array = new Uint8Array(compressedImageBuffer);
+      const arrayBuffer = uint8Array.buffer.slice(0, uint8Array.byteLength);
+      imageUrl = await saveImageToFirebaseStorage(arrayBuffer, fileName, payload.eventId);
     }
 
     const entity = {
@@ -99,7 +101,9 @@ export const updateGiftsAsync = async (payload: GiftModel, fileName: string) => 
       if (!compressedImageBuffer) {
         throw new Error("Error compressing image");
       }
-      imageUrl = await saveImageToFirebaseStorage(compressedImageBuffer.buffer, fileName, payload.eventId);
+      const uint8Array = new Uint8Array(compressedImageBuffer);
+      const arrayBuffer = uint8Array.buffer.slice(0, uint8Array.byteLength);
+      imageUrl = await saveImageToFirebaseStorage(arrayBuffer, fileName, payload.eventId);
     }
 
     const giftQuery = query(
