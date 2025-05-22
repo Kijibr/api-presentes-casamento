@@ -48,7 +48,7 @@ export interface CreateMenuItemDTO {
   category: string;
   isAvailable?: boolean;
 }
-
+ 
 export interface UpdateMenuItemDTO {
   name?: string;
   description?: string;

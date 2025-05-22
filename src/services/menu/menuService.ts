@@ -15,9 +15,9 @@ export async function createMenuItem(data: CreateMenuItemDTO): Promise<string | 
       data.isAvailable
     );
 
-    const docRef = await addDoc(menuCollection, { ...newItem })
+    await addDoc(menuCollection, { ...newItem })
 
-    return docRef.id;
+    return newItem.id;
   } catch (error) {
     LogError(`Error creating menu item: ${error}`);
     return null;
@@ -50,13 +50,13 @@ export async function getMenuItemById(id: string): Promise<MenuItem | null> {
   }
 }
 
-export async function updateMenuItem(id: string, data: UpdateMenuItemDTO): Promise<boolean> {
+export async function updateMenuItem(id: string, data: UpdateMenuItemDTO): Promise<string> {
   try {
     const menuQuery = query(menuCollection, where("id", "==", id))
     const menuDoc = await getDocs(menuQuery);
 
     if (menuDoc.empty) {
-      return false;
+      return '';
     }
 
     const rawData = menuDoc.docs[0].data() as MenuItem;
@@ -65,10 +65,10 @@ export async function updateMenuItem(id: string, data: UpdateMenuItemDTO): Promi
     currentDocInstance.applyUpdates!(data);
 
     await updateDoc(menuDoc.docs[0].ref, { ...currentDocInstance });
-    return true;
+    return currentDocInstance.id;
   } catch (error) {
     LogError(`Error updating menu item: ${error}`);
-    return false;
+    return '';
   }
 }
 

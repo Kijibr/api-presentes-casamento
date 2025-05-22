@@ -1,6 +1,7 @@
 import { addDoc, getDocs, query, updateDoc, where } from "firebase/firestore/lite";
 import { guestsCollection } from "../firebase";
 import { GuestType } from "../../types";
+import { LogError } from "../logger";
 
 export const getAllGuests = async () => {
   const guestsSnap = await getDocs(guestsCollection);
@@ -41,6 +42,6 @@ export const addNewGuest = async (name: string) => {
       name,
     });
   } catch (e) {
-    console.error("Error adding document: ", e);
+    LogError(`Error inserting document: ${JSON.stringify(e)}`);
   }
 }

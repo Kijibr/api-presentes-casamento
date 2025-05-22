@@ -17,7 +17,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       return res.status(401).json({ error: "User not found" });
     }
 
-    LogInformation(`UserId: ${userId} - ${checkIfUserExists.email}`);
+    LogInformation(`UserId: ${userId} - ${checkIfUserExists?.contact?.email}`);
     return next();
   } catch (err) {
     LogError(`Error in middleware: ${err}`);
