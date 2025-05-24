@@ -6,6 +6,7 @@ import paymentsRoutes from './payments';
 import webhookRoutes from './webhook';
 import menu from './menu';
 import suppliers from './suppliers';
+import events from './events';
 import { authMiddleware } from '../middlewares/auth';
 
 const router = Router();
@@ -17,5 +18,6 @@ router.use('/gifts', authMiddleware, giftsRoutes);
 router.use('/guests', authMiddleware, guestsRoutes);
 router.use('/menu', authMiddleware, menu);
 router.use('/suppliers', authMiddleware, suppliers);
+router.use('/events', authMiddleware, events);
 
 export default router; 

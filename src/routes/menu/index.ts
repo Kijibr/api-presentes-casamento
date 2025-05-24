@@ -8,6 +8,6 @@ router.post('/add', menuController.createMenuItem);
 router.get('/list', menuController.getMenuItems);
 router.get('/getById/:id', menuController.getMenuItemById);
 router.put('/update/:id', menuController.updateMenuItem);
-router.delete('/remove/:id', menuController.deleteMenuItem);
+router.delete('/delete/:id', menuController.deleteMenuItem);
 
 export default router; 

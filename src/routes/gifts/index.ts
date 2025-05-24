@@ -83,7 +83,7 @@ router.patch("/update/:giftId", uploadMiddleware, async (req: Request, res: Resp
   }
 });
 
-router.delete("/remove/:giftId", async (req: Request, res: Response) => {
+router.delete("/delete/:giftId", async (req: Request, res: Response) => {
   try {
     const { giftId } = req.params;
     if (!giftId) {
