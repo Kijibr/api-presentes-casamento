@@ -23,3 +23,4 @@ export const giftsCollection = collection(database, 'gifts');
 export const menuCollection = collection(database, 'menu'); 
 export const suppliersCollection = collection(database, 'suppliers'); 
 export const eventsCollection = collection(database, 'events'); 
+export const usersCollection = collection(database, 'users'); 

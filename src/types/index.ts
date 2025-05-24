@@ -3,6 +3,7 @@ export class BaseType {
   id: string;
   createdAt: string = new Date().toISOString();
   updatedAt?: string | null = null;
+  deleted?: boolean = false;
 
   constructor() {
     this.id = uuidv4();
@@ -114,7 +115,6 @@ export type GiftToPay = {
 }
 
 export type ContactType = {
-  name: string;
   email: string;
   phone: string;
 }
@@ -126,9 +126,14 @@ type UserType = BaseType & {
   password: string;
 }
 
-export type GuestType = UserType & {
+export type GuestType = {
+  id: string;
+  userId: string;
+  name: string;
   confirmed: boolean;
   answered: boolean;
+  createdAt: string;
+  updatedAt?: string | null;
 }
 
 export type Address = {

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { LogError, LogInformation } from "../../src/services/logger";
-import { getGuest } from "../../src/services/guests";
+import { getUserById } from "../services/users/usersService";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,7 +11,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       return res.status(401).json({ error: "Authorization token not provided" });
     }
 
-    const checkIfUserExists = await getGuest(userId);
+    const checkIfUserExists = await getUserById(userId);
     if (!checkIfUserExists) {
       LogError(`User does not exist: ${userId}`);
       return res.status(401).json({ error: "User not found" });
