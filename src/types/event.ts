@@ -15,8 +15,8 @@ export class Event extends BaseType {
   };
   type: 'wedding' | 'birthday' | 'corporate' | 'graduation' | 'show' | 'other';
   guests?: string[];
-  menu?: string;
-  giftList?: string;
+  menu?: string[];
+  giftList?: string[];
   payments?: string[];
   suppliers?: string[];
   organizer?: string;
@@ -35,8 +35,8 @@ export class Event extends BaseType {
     endDate?: Date,
     location?: { name?: string; address?: Address; coordinates?: { latitude: string; longitude: string } },
     guests?: string[],
-    menu?: string,
-    giftList?: string,
+    menu?: string[],
+    giftList?: string[],
     payments?: string[],
     suppliers?: string[],
     organizer?: string,
@@ -108,8 +108,8 @@ export interface CreateEventDTO {
     }
   };
   guests?: string[];
-  menu?: string;
-  giftList?: string;
+  menu?: string[];
+  giftList?: string[];
   payments?: string[];
   suppliers?: string[];
   organizer?: string;
@@ -135,8 +135,8 @@ export interface UpdateEventDTO {
     }
   };
   guests?: string[];
-  menu?: string;
-  giftList?: string;
+  menu?: string[];
+  giftList?: string[];
   payments?: string[];
   suppliers?: string[];
   organizer?: string;
