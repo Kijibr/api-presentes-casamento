@@ -14,7 +14,7 @@ const router = Router();
 router.use('/webhook', webhookRoutes);
 router.use('/payment', authMiddleware, paymentsRoutes);
 router.use('/gifts', authMiddleware, giftsRoutes);
-router.use('/guests', authMiddleware, guestsRoutes);
+router.use('/guests', guestsRoutes);
 router.use('/menu', authMiddleware, menu);
 router.use('/suppliers', authMiddleware, suppliers);
 router.use('/events', authMiddleware, events);
